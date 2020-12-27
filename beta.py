@@ -1,8 +1,7 @@
 import os
-from os import path
 
 def setWd():
-    os.chdir('C:/Users/user/Desktop/tests')
+    os.chdir('C:/Users/maxio/Desktop/tests')
     return os.getcwd()
 
 def amountOfDir(workpath):
@@ -20,7 +19,7 @@ def ifTdExists(wd, i):
     else:
         return False
 
-def runTest():
+def runLinuxCommands():
     def runTest():  # na razie bezargumentowa
         file = open("test_desc.txt", "r").read().split('\n')  # otwiera plik i czyta linia po linii bez enterów
         line_count = 0  # licznik linii
@@ -60,17 +59,19 @@ def runDiffTest():
                 listOfValues.append('OK')  #sprawdzamy czy wartość check do raportu ma być OK czy FAIL
     return print(all(check == 'OK' for check in listOfValues))
 
+def report(folder, tag, make, run, check):
+    filepath = 'C:/Users/maxio/Desktop/tests/NowyOutput.txt' #home2/archive/....
+    if os.path.isfile(filepath):
+        os.remove(filepath)
+    f = open(filepath, 'w')
+    f.write('Folder\tTag\tMake\tRun\tCheck\n')
+    for i in range(len(folder)):
+        f.write("{}\t{}\t{}\t{}\t{}\n".format(folder[i], tag[i], make[i], run[i], check[i]))
+    f.close()
 
 
-
-
-# setwd = setWd()
-# print(setwd)
-# N = amountOfDir(setwd)
-# print(N)
-# check = ifStExists(setwd, 1)
-# check2 = ifTdExists(setwd, 1)
-# print(check)
-# print(check2)
-# runTest()
+setwd = setWd()
+print(setwd)
+N = amountOfDir(setwd)
+print(N)
 
