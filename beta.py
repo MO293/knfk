@@ -1,24 +1,30 @@
 import os
 
+#Funkcja ustawia ścieżkę na testsuite
 def setWd():
-    os.chdir('C:/Users/maxio/Desktop/tests')
+    os.chdir('C:/Users/user/Desktop/tests')
     return os.getcwd()
 
+#Funkcja zlicza ile st/td testów będzie do wykonania
 def amountOfDir(workpath):
     return int(len(next(os.walk(workpath))[1]) / 2) #funkcja zliczająca foldery
 
+#Funkcja sprawdza czy dany st-test-i istnieje
 def ifStExists(wd, i):
     if path.exists(str(wd) + str("/st-test-{}".format(i))):
         return True
     else:
         return False
 
+#Funkcja sprawdza cy dany td-test-i istnieje
+#Możliwość sklejenia w jedną funkcję sprawdzającą czy test-i istnieje
 def ifTdExists(wd, i):
     if path.exists(str(wd) + str("/td-test-{}".format(i))):
         return True
     else:
         return False
 
+#Funkcja wywołująca komendy z pliku test_desc
 def runLinuxCommands():
     def runTest():  # na razie bezargumentowa
         file = open("test_desc.txt", "r").read().split('\n')  # otwiera plik i czyta linia po linii bez enterów
@@ -47,6 +53,7 @@ def runLinuxCommands():
         # if tag == 'diff': #dla tagu "diff" sprawdzamy stosunek wartości referencyjnych do outputowych i czy < 10e-3
         #   runDiffTest()
 
+#Funkcja porównująca wartości outputowe cmp z referencyjnymi ref
 def runDiffTest():
     listOfValues = []
     with open('test1_cmp.txt') as bf1:
@@ -59,6 +66,7 @@ def runDiffTest():
                 listOfValues.append('OK')  #sprawdzamy czy wartość check do raportu ma być OK czy FAIL
     return print(all(check == 'OK' for check in listOfValues))
 
+#Funkcja generująca raport
 def report(folder, tag, make, run, check):
     filepath = 'C:/Users/maxio/Desktop/tests/NowyOutput.txt' #home2/archive/....
     if os.path.isfile(filepath):
@@ -69,7 +77,7 @@ def report(folder, tag, make, run, check):
         f.write("{}\t{}\t{}\t{}\t{}\n".format(folder[i], tag[i], make[i], run[i], check[i]))
     f.close()
 
-
+#Main
 setwd = setWd()
 print(setwd)
 N = amountOfDir(setwd)
