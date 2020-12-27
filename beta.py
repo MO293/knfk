@@ -46,7 +46,19 @@ def runTest():
                 # wartości make i run będą zbierane już do raportu
         return [make, run]
         # if tag == 'diff': #dla tagu "diff" sprawdzamy stosunek wartości referencyjnych do outputowych i czy < 10e-3
-        #   generateReport()
+        #   runDiffTest()
+
+def runDiffTest():
+    listOfValues = []
+    with open('test1_cmp.txt') as bf1:
+        with open('test1_ref.txt') as bf2:
+            for line1, line2 in zip(bf1, bf2):
+                cmp_tag, cmp_value = line1.split(": ") #tworzymy 2 stringi: tag i wartość z outputu
+                ref_tag, ref_value = line1.split(": ") #tworzymy 2 stringi: tag i wartość z referencyjnego
+                cmp_value = float(cmp_value.rstrip('\n')) #str to float
+                ref_value = float(ref_value.rstrip('\n')) #str to float
+                listOfValues.append('OK')  #sprawdzamy czy wartość check do raportu ma być OK czy FAIL
+    return print(all(check == 'OK' for check in listOfValues))
 
 
 
