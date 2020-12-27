@@ -11,7 +11,7 @@ def amountOfDir(workpath):
 
 #Funkcja sprawdza czy dany st-test-i istnieje
 def ifStExists(wd, i):
-    if path.exists(str(wd) + str("/st-test-{}".format(i))):
+    if os.path.exists(str(wd) + str("/st-test-{}".format(i))):
         return True
     else:
         return False
@@ -19,7 +19,7 @@ def ifStExists(wd, i):
 #Funkcja sprawdza cy dany td-test-i istnieje
 #Możliwość sklejenia w jedną funkcję sprawdzającą czy test-i istnieje
 def ifTdExists(wd, i):
-    if path.exists(str(wd) + str("/td-test-{}".format(i))):
+    if os.path.exists(str(wd) + str("/td-test-{}".format(i))):
         return True
     else:
         return False
