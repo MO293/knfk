@@ -1,13 +1,10 @@
 import os
 
-#Funkcja ustawia ścieżkę na testsuite
-def setWd():
-    os.chdir('C:/Users/user/Desktop/tests')
-    return os.getcwd()
-
-#Funkcja zlicza ile st/td testów będzie do wykonania
-def amountOfDir(workpath):
-    return int(len(next(os.walk(workpath))[1]) / 2) #funkcja zliczająca foldery
+#Funkcja ustawia ścieżkę na testsuite i zlicza ile jest w nich folderów (testów st/td) do wykonania
+def amountOfDirs():
+    os.chdir('C:/Users/maxio/Desktop/testsuite')
+    workPath = os.getcwd()
+    return int(len(next(os.walk(workPath))[1]) / 2)  # funkcja zliczająca foldery
 
 #Funkcja sprawdza czy dany st-test-i istnieje
 def ifStExists(wd, i):
@@ -78,8 +75,6 @@ def report(folder, tag, make, run, check):
     f.close()
 
 #Main
-setwd = setWd()
-print(setwd)
-N = amountOfDir(setwd)
+N = amountOfDirs(setwd)
 print(N)
 
