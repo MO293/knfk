@@ -27,4 +27,3 @@ def runLinuxCommands(): # na razie bezargumentowa
         #   generateReport()
 make, run = runLinuxCommands() #myślę że będzie zwracać od razu argumenty przekazywane do raportu
 print('Done.')
-
