@@ -1,5 +1,5 @@
 import os
-def runTest(): # na razie bezargumentowa
+def runLinuxCommands(): # na razie bezargumentowa
     file = open("test_desc.txt", "r").read().split('\n') #otwiera plik i czyta linia po linii bez enterów
     line_count = 0 #licznik linii
     for i in file: # pętla wykonuje się tak długo aż plik ma linie
@@ -25,5 +25,5 @@ def runTest(): # na razie bezargumentowa
     return [make, run]
         # if tag == 'diff': #dla tagu "diff" sprawdzamy stosunek wartości referencyjnych do outputowych i czy < 10e-3
         #   generateReport()
-make, run = runTest() #myślę że będzie zwracać od razu argumenty przekazywane do raportu
+make, run = runLinuxCommands() #myślę że będzie zwracać od razu argumenty przekazywane do raportu
 print('Done.')
