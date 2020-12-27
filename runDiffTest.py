@@ -17,4 +17,4 @@ def runDiffTest():
                 ref_value = float(ref_value.rstrip('\n')) #str to float
                 listOfValues.append('OK')  #sprawdzamy czy wartość check do raportu ma być OK czy FAIL
     return print(all(check == 'OK' for check in listOfValues))
-runDiffTest()
+# runDiffTest()
