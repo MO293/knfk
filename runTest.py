@@ -25,5 +25,5 @@ def runTest(): # na razie bezargumentowa
     return [make, run]
         # if tag == 'diff': #dla tagu "diff" sprawdzamy stosunek wartości referencyjnych do outputowych i czy < 10e-3
         #   generateReport()
-make, run = runTest()
+make, run = runTest() #myślę że będzie zwracać od razu argumenty przekazywane do raportu
 print('Done.')
