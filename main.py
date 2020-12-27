@@ -71,7 +71,7 @@ def runTest():
 #     # 3b.   Jeżeli plik wykonywalny istnieje to RUN.
 #
 #
-def report():
+def runDiffTest():
 #     # Funkcja główna programu.
 #     # 0.    Sprawdzić czy test1.txt i test1_ref.txt istnieje
 #     # 1.    Porównanie outputów test-i.ref z wygenerowanym test-i.cmp
@@ -79,10 +79,11 @@ def report():
 #     # 1b.   Wejście do pliku .cmp, zczytanie wartości (najlepiej do tablicy/listy)
 #     # 1c.   Wyznaczenie stosunków wartości cmp/ref (czy mieszczą się w 10e-3), zapisanie wartości stosunków do listy lub
 #     #       opcjonalnie if(<10e-3) zwróć stringa 'OK'.
-#     # 2.    Wygeneruj raport .csv/.xls/.xlsx/.dat/.txt (nazwy kolumn: folder|tag|make|run|check)
-#     # 3.    Zapisać raport w cd /home2/archive/ (opcjonalnie, nie wiem czy nie będzie on zczytywany szybciej niż 100 dni)
-#
-#
+
+def report():
+#     # 1.    Wygeneruj raport .csv/.xls/.xlsx/.dat/.txt (nazwy kolumn: folder|tag|make|run|check)
+#     # 2.    Zapisać raport w cd /home2/archive/ (opcjonalnie, nie wiem czy nie będzie on zczytywany szybciej niż 100 dni)
+
 def clean():
 #     # Funkcja opcjonalna
 #     # 1.    Sprzątamy w danym folderze, usuwamy niepotrzebne pliki, program kontynuuje prace na następnym st/td-test-i+1 folderze.
