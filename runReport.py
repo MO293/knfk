@@ -18,4 +18,4 @@ tag = ['test1', 'test2', 'test3', 'test4', 'test5']
 make = ['OK', 'OK', 'FAIL', 'OK', 'FAIL']
 run = ['OK', 'FAIL', 'OK', 'FAIL', 'FAIL']
 check = ['FAIL', 'FAIL', 'OK', 'FAIL', 'FAIL']
-report(folder, tag, make, run, check)
+runReport(folder, tag, make, run, check)
