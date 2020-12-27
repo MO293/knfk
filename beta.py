@@ -63,10 +63,6 @@ def runDiffTest():
 
 
 
-
-
-
-
 setwd = setWd()
 print(setwd)
 N = amountOfDir(setwd)
@@ -76,4 +72,3 @@ check2 = ifTdExists(setwd, 1)
 print(check)
 print(check2)
 runTest()
-
