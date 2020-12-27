@@ -2,7 +2,7 @@ import os
 from os import path
 
 def setWd():
-    os.chdir('C:/Users/maxio/Desktop/tests')
+    os.chdir('C:/Users/user/Desktop/tests')
     return os.getcwd()
 
 def amountOfDir(workpath):
@@ -64,16 +64,13 @@ def runDiffTest():
 
 
 
-
-
-
-setwd = setWd()
-print(setwd)
-N = amountOfDir(setwd)
-print(N)
-check = ifStExists(setwd, 1)
-check2 = ifTdExists(setwd, 1)
-print(check)
-print(check2)
-runTest()
+# setwd = setWd()
+# print(setwd)
+# N = amountOfDir(setwd)
+# print(N)
+# check = ifStExists(setwd, 1)
+# check2 = ifTdExists(setwd, 1)
+# print(check)
+# print(check2)
+# runTest()
 
