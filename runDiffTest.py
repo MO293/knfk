@@ -13,8 +13,7 @@ def runDiffTest():
             for line1, line2 in zip(bf1, bf2):
                 cmp_tag, cmp_value = line1.split(": ") #tworzymy 2 stringi: tag i wartość z outputu
                 ref_tag, ref_value = line1.split(": ") #tworzymy 2 stringi: tag i wartość z referencyjnego
-                cmp_value = float(cmp_value.rstrip('\n')) #str to float
-                ref_value = float(ref_value.rstrip('\n')) #str to float
-                listOfValues.append('OK')  #sprawdzamy czy wartość check do raportu ma być OK czy FAIL
-    return print(all(check == 'OK' for check in listOfValues))
-# runDiffTest()
+                listOfValues.append(float(cmp_value.rstrip('\n')) - float(ref_value.rstrip('\n')))
+                if all(comparedValue < 10e-3 for comparedValue in listOfValues): now_check = 'OK'
+                else: now_check = 'FALSE'
+    return now_check
