@@ -11,7 +11,7 @@ def amountOfDirs(): # funkcja zliczająca foldery
 #Jesteśmy w katalogu testsuite
 #Funkcja liczy linie z nazwami folderów testów
 def count():
-	testList = np.genfromtxt("tlist.txt", dtype=str, comments = "#")
+	testList = list(np.genfromtxt("tlist.txt", dtype=str, comments = "#"))
 	return testList, len(testList)
 
 #Funkcja sprawdza czy dany test istnieje
