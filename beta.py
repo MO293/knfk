@@ -1,39 +1,28 @@
 import os
 import time
+import numpy as np
 start_time = time.time()
 
 def amountOfDirs(): # funkcja zliczająca foldery
-    os.chdir('C:/Users/maxio/Desktop/testsuite')
+    os.chdir('/home/prohackerxxx/Desktop/testsuitePython/knfk')
     workPath = os.getcwd()
     return int(len(next(os.walk(workPath))[1]) / 2)
 
 #Jesteśmy w katalogu testsuite
-#Funkcja sprawdza czy dany st-test-i istnieje
-def ifStExists(numberOfStTest):
-    if os.path.exists('st-test-{}'.format(numberOfStTest)):
-        listOfFolders.append('st-test-{}'.format(numberOfStTest))
-        listOfTags.append('test-{}'.format(numberOfStTest))
-        return True
-    else:
-        listOfFolders.append('st-test-{}'.format(numberOfStTest))
-        listOfTags.append('test-{} failed'.format(numberOfStTest))
-        listOfMakes.append('FAIL'.format(numberOfStTest))
-        listOfRuns.append('FAIL'.format(numberOfStTest))
-        listOfChecks.append('FAIL'.format(numberOfStTest))
-        return False
+#Funkcja liczy linie z nazwami folderów testów
+def count():
+	testList = np.genfromtxt("tlist.txt", dtype=str)
+	return testList, len(testList)
+listOfTests, N = count()
 
-#Funkcja sprawdza czy dany td-test-i istnieje
-def ifTdExists(numberOfTdTest):
-    if os.path.exists('td-test-{}'.format(numberOfTdTest)):
-        listOfFolders.append('td-test-{}'.format(numberOfTdTest))
-        listOfTags.append('test{}'.format(numberOfTdTest))
+#Funkcja sprawdza czy dany test istnieje
+def ifTestExists(testName):
+    if os.path.exists(testName):
         return True
     else:
-        listOfFolders.append('td-test-{}'.format(numberOfTdTest))
-        listOfTags.append('test{} failed'.format(numberOfTdTest))
-        listOfMakes.append('FAIL'.format(numberOfTdTest))
-        listOfRuns.append('FAIL'.format(numberOfTdTest))
-        listOfChecks.append('FAIL'.format(numberOfTdTest))
+        listOfMakes.append('FAIL at {}'.format(testName))
+        listOfRuns.append('FAIL'.format(testName))
+        listOfChecks.append('FAIL'.format(testName))
         return False
 
 #Funkcja wywołująca komendy z pliku test_desc
@@ -74,7 +63,7 @@ def runDiffTest():
 
 #Funkcja generująca raport
 def report(folder, tag, make, run, check):
-    filepath = 'C:/Users/maxio/Desktop/testsuite/NowyOutput.txt' #home2/archive/....
+    filepath = '/home/prohackerxxx/Desktop/testsuitePython/knfk/NowyOutput.txt' #home2/archive/....
     if os.path.isfile(filepath):
         os.remove(filepath)
     f = open(filepath, 'w')
@@ -87,9 +76,9 @@ def report(folder, tag, make, run, check):
 N = amountOfDirs()
 listOfFolders, listOfTags, listOfMakes, listOfRuns, listOfChecks = [], [], [], [], []
 for i in range(1, N+1):
-    if not ifStExists(i): pass
+    if not ifTestExists(i): pass
     else:
-        path = 'C:/Users/maxio/Desktop/testsuite/st-test-{}'.format(i)
+        path = '/home/prohackerxxx/Desktop/testsuitePython/knfk/st-test-{}'.format(i)
         os.chdir(path) #Wchodzimy do folderu st-test-i
         make, run = runLinuxCommands(path)
         listOfMakes.append(make)
@@ -99,17 +88,6 @@ for i in range(1, N+1):
         listOfChecks.append(check)
         del check
 
-    if not ifTdExists(i): pass
-    else:
-        path = 'C:/Users/maxio/Desktop/testsuite/td-test-{}'.format(i)
-        os.chdir(path) #Wchodzimy do folderu st-test-i
-        make, run = runLinuxCommands(path)
-        listOfMakes.append(make)
-        listOfRuns.append(run)
-        del make, run
-        check = runDiffTest()
-        listOfChecks.append(check)
-        del check
 report(listOfFolders, listOfTags, listOfMakes, listOfRuns, listOfChecks)
 print('Done.')
 print("--- %.8s seconds ---" % (time.time() - start_time))

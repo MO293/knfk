@@ -1,9 +1,10 @@
 # Funkcja określa jakie testy są do zrealizowania
 # Zwraca listę stringów i długość dla tablicy for
+import numpy as np
+
 def count():
-    array = []
-    f = open('testlist.txt', 'r').read().split('\n')
-    for i in f:
-        array.append(i)
-    return array, len(array)
+	testList = np.genfromtxt("tlist.txt", dtype=str)
+	return testList, len(testList)
+
 listOfTests, N = count()
+print(listOfTests, N)
