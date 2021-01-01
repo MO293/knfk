@@ -3,26 +3,26 @@ import time
 import numpy as np
 start_time = time.time()
 
-def amountOfDirs(): # funkcja zliczająca foldery
-    os.chdir('/home/prohackerxxx/Desktop/testsuitePython/knfk')
-    workPath = os.getcwd()
-    return int(len(next(os.walk(workPath))[1]) / 2)
-
 #Jesteśmy w katalogu testsuite
 #Funkcja liczy linie z nazwami folderów testów
 def count():
-	testList = list(np.genfromtxt("tlist.txt", dtype=str, comments = "#"))
-	return testList, len(testList)
+    testList = list(np.genfromtxt("tlist.txt", dtype=str, comments="#"))
+    return testList, len(testList)
 
 #Funkcja sprawdza czy dany test istnieje
-def ifTestExists(testName):
-    if os.path.exists(testName):
-        return True
-    else:
-        listOfMakes.append('FAIL at {}'.format(testName))
-        listOfRuns.append('FAIL'.format(testName))
-        listOfChecks.append('FAIL'.format(testName))
+def testInDir(testName, ii):
+    if not os.path.exists(testName):
+        listOfFolders.append('Test {} does not exist'.format(testName))
+        listOfTags.append('FAIL of test-{}'.format(ii))
+        listOfMakes.append('FAIL')
+        listOfRuns.append('FAIL')
+        listOfChecks.append('FAIL')
         return False
+    else:
+        listOfFolders.append('{}'.format(testName))
+        listOfTags.append('test {}'.format(ii))
+        return True
+
 
 #Funkcja wywołująca komendy z pliku test_desc
 def runLinuxCommands(nowpath):
@@ -61,32 +61,58 @@ def runDiffTest():
     return now_check
 
 #Funkcja generująca raport
-def report(folder, tag, make, run, check):
+def report(Lfolder, Ltag, Lmake, Lrun, Lcheck):
     filepath = '/home/prohackerxxx/Desktop/testsuitePython/knfk/NowyOutput.txt' #home2/archive/....
     if os.path.isfile(filepath):
         os.remove(filepath)
     f = open(filepath, 'w')
     f.write('Folder\tTag\tMake\tRun\tCheck\n')
-    for ii in range(len(folder)):
-        f.write("{}\t{}\t{}\t{}\t{}\n".format(folder[ii], tag[ii], make[ii], run[ii], check[ii]))
+    for ii in range(len(Lfolder)):
+        f.write("{}\t{}\t{}\t{}\t{}\n".format(Lfolder[ii], Ltag[ii], Lmake[ii], Lrun[ii], Lcheck[ii]))
     f.close()
 
 #Main
-N = amountOfDirs()
+os.chdir('C:/Users/maxio/Desktop/Pythong')
+listOfTests, N = count() # Zapis do zmiennych listy nazwy testów i ile ich ma być do wykonania
 listOfFolders, listOfTags, listOfMakes, listOfRuns, listOfChecks = [], [], [], [], []
 for i in range(1, N+1):
-    if not ifTestExists(i): pass
-    else:
-        path = '/home/prohackerxxx/Desktop/testsuitePython/knfk/st-test-{}'.format(i)
-        os.chdir(path) #Wchodzimy do folderu st-test-i
-        make, run = runLinuxCommands(path)
-        listOfMakes.append(make)
-        listOfRuns.append(run)
-        del make, run
-        check = runDiffTest()
-        listOfChecks.append(check)
-        del check
+    nameOfTest = listOfTests[i-1]
+    ifdir = testInDir(nameOfTest, i)
+    if ifdir == True:
+        path = 'C:/Users/maxio/Desktop/Pythong/{}'.format(nameOfTest)
+        os.chdir(path)
+        if os.path.exists('test.desc'):
+            make, run = runLinuxCommands(path)
+            listOfMakes.append(make)
+            listOfRuns.append(run)
+            del make, run
+            check = runDiffTest()
+            listOfChecks.append(check)
+            del check
+        else:
+            listOfMakes.append('FAIL')
+            listOfRuns.append('FAIL')
+            listOfChecks.append('FAIL')
+    else: continue
 
-report(listOfFolders, listOfTags, listOfMakes, listOfRuns, listOfChecks)
+print(listOfFolders)
+print(listOfTags)
+print(listOfMakes)
+print(listOfRuns)
+print(listOfChecks)
+    # if testInDir(nameOfTest, i):
+
+    # else:
+    #     path = '/home/prohackerxxx/Desktop/testsuitePython/knfk/st-test-{}'.format(i)
+    #     os.chdir(path) #Wchodzimy do folderu st-test-i
+    #     make, run = runLinuxCommands(path)
+    #     listOfMakes.append(make)
+    #     listOfRuns.append(run)
+    #     del make, run
+    #     check = runDiffTest()
+    #     listOfChecks.append(check)
+    #     del check
+
+# report(listOfFolders, listOfTags, listOfMakes, listOfRuns, listOfChecks)
 print('Done.')
 print("--- %.8s seconds ---" % (time.time() - start_time))
