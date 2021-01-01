@@ -3,7 +3,7 @@
 import numpy as np
 
 def count():
-	testList = np.genfromtxt("tlist.txt", dtype=str, comments="#")
+	testList = list(np.genfromtxt("tlist.txt", dtype=str, comments="#"))
 	return testList, len(testList)
 
 listOfTests, N = count()
