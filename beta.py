@@ -41,10 +41,10 @@ def testDescIsPresent(nameOfFolder, folderIsPresent):
 def runLinuxCommands(nowpath):
     file = open('test_desc.txt', "r").read().split('\n')  # otwiera plik i czyta linia po linii bez enterów
     line_count = 0  # licznik linii
-    for ii in file:  # pętla wykonuje się tak długo aż plik ma linie
-        tag, command = ii.split(": ")  # tworzy 2 stringi nadpisywane co iteracje
+    for line in file:  # pętla wykonuje się tak długo aż plik ma linie
+        tag, command = line.split(": ")  # tworzy 2 stringi nadpisywane co iteracje
         print('Linia nr ' + str(line_count) + ' zawiera komendę: ' + command)  # outputuje komendę dla danej linii pliku
-        if ii != "\n": # Jeżeli linia NIE JEST Enterem to licznik++
+        if line != "\n": # Jeżeli linia NIE JEST Enterem to licznik++
             line_count += 1
         if tag == 'tag': continue # Pomija ten tag i idzie do następnego kroku w pętli, czyli do następnej linii pliku
         if tag == 'exec':  # wykonanie komendy
