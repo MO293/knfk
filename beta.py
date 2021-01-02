@@ -1,5 +1,7 @@
 import os
 import time
+import datetime
+import getpass
 import numpy as np
 start_time = time.time()
 
@@ -13,7 +15,7 @@ def count():
 def testIsPresent(testName, ii):
     if os.path.exists(testName):
         listOfFolders.append('{}'.format(testName))
-        listOfTags.append('test {}'.format(ii))
+        listOfTags.append('test{}'.format(ii))
         return True
     else:
         listOfFolders.append('Test {} does not exist'.format(testName))
@@ -24,9 +26,9 @@ def testIsPresent(testName, ii):
         return False
 
 #Funkcja sprawdza czy  w danym teście istnieje plik test_desc
-def testDescIsPresent(nameOfFolder, condition):
-    if condition:
-        os.chdir('C:/Users/maxio/Desktop/Pythong/{}'.format(nameOfFolder)) # Jeżeli folder istnieje to wchodzi do folderu
+def testDescIsPresent(nameOfFolder, folderIsPresent):
+    if folderIsPresent:
+        os.chdir('C:/Users/maxio/Desktop/Pythong/{}'.format(nameOfFolder)) # Jeżeli folder istnieje to wchodzi do niego
         if os.path.exists('test_desc.txt'): return True # Jeżeli test.desc istnieje to zwraca True
         else: # Jeżeli test.desc nie istnieje to dodaje FAIL dla makes/run/checks
             listOfMakes.append('FAIL')
@@ -81,8 +83,9 @@ def runDiffTest():
     return now_check
 
 #Funkcja generująca raport
-def report(Lfolder, Ltag, Lmake, Lrun, Lcheck):
-    filepath = '/home/prohackerxxx/Desktop/testsuitePython/knfk/NowyOutput.txt' #home2/archive/....
+def runReport(Lfolder, Ltag, Lmake, Lrun, Lcheck):
+    nameReport = getpass.getuser() + '_report_' + datetime.datetime.now().strftime("%d.%m.%Y_%H.%M")
+    filepath = 'C:/Users/maxio/Desktop/Pythong/' + nameReport + '.txt'
     if os.path.isfile(filepath):
         os.remove(filepath)
     f = open(filepath, 'w')
@@ -97,8 +100,9 @@ listOfTests, N = count() # Zapis do listy nazwy testów i ile ich ma być do wyk
 listOfFolders, listOfTags, listOfMakes, listOfRuns, listOfChecks, listOfErrors = [], [], [], [], [], []
 for i in range(1, N+1):
     nameOfTest = listOfTests[i-1]
-    ifdir = testIsPresent(nameOfTest, i)
-    ifdesc = testDescIsPresent(nameOfTest, ifdir)
+    ifdir = testIsPresent(nameOfTest, i) #Sprawdza czy dany folder z wypisanych w liście istnieje: zwraca T/F
+    ifdesc = testDescIsPresent(nameOfTest, ifdir) #Sprawdza czy w danym folderze, który istnieje jest plik test.desc: zwraca T/F
+    #Oba powyższe muszą być ustawione na True, inaczej pętla przejdzie do następnego folderu z testem.
     if ifdir and ifdesc:
         path = 'C:/Users/maxio/Desktop/Pythong/{}'.format(nameOfTest)
         os.chdir(path)
@@ -107,8 +111,6 @@ for i in range(1, N+1):
         listOfRuns.append(run)
         check = runDiffTest()
         listOfChecks.append(check)
-    elif ifdir is True and ifdesc is False: continue
-    elif ifdir is False and ifdesc is True: continue
     else: continue
 
 print(listOfFolders, len(listOfFolders))
@@ -117,6 +119,6 @@ print(listOfMakes, len(listOfMakes))
 print(listOfRuns, len(listOfRuns))
 print(listOfChecks, len(listOfChecks))
 
-# report(listOfFolders, listOfTags, listOfMakes, listOfRuns, listOfChecks)
+runReport(listOfFolders, listOfTags, listOfMakes, listOfRuns, listOfChecks)
 print('Done.')
 print("--- %.8s seconds ---" % (time.time() - start_time))
