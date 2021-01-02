@@ -54,8 +54,7 @@ def runLinuxCommands(nowpath):
             possible_files = [fn for fn in file_list if '-wslda-' in fn]
             if not possible_files: now_make = 'FAIL'
             else: now_make = 'OK'
-            del possible_files, file_list
-            if os.path.exists('trzy/test1_cmp.txt'): now_run = 'OK'
+            if os.path.exists('test1_cmp.txt'): now_run = 'OK'
             else: now_run = 'FAIL'
         if tag == 'diff': pass
     return now_make, now_run
@@ -86,8 +85,6 @@ def runDiffTest():
 def runReport(Lfolder, Ltag, Lmake, Lrun, Lcheck):
     nameReport = getpass.getuser() + '_report_' + datetime.datetime.now().strftime("%d.%m.%Y_%H.%M")
     filepath = 'C:/Users/maxio/Desktop/Pythong/' + nameReport + '.txt'
-    if os.path.isfile(filepath):
-        os.remove(filepath)
     f = open(filepath, 'w')
     f.write('Folder\tTag\tMake\tRun\tCheck\n')
     for ii in range(len(Lfolder)):
@@ -95,7 +92,7 @@ def runReport(Lfolder, Ltag, Lmake, Lrun, Lcheck):
     f.close()
 
 #Main
-os.chdir('C:/Users/maxio/Desktop/Pythong')
+os.chdir('C:/Users/maxio/Desktop/Pythong') #Ustawiamy się w folderze roboczym /home2/scratch/knfk/cold-atoms/testsuite
 listOfTests, N = count() # Zapis do listy nazwy testów i ile ich ma być do wykonania
 listOfFolders, listOfTags, listOfMakes, listOfRuns, listOfChecks, listOfErrors = [], [], [], [], [], []
 for i in range(1, N+1):
@@ -104,9 +101,8 @@ for i in range(1, N+1):
     ifdesc = testDescIsPresent(nameOfTest, ifdir) #Sprawdza czy w danym folderze, który istnieje jest plik test.desc: zwraca T/F
     #Oba powyższe muszą być ustawione na True, inaczej pętla przejdzie do następnego folderu z testem.
     if ifdir and ifdesc:
-        path = 'C:/Users/maxio/Desktop/Pythong/{}'.format(nameOfTest)
-        os.chdir(path)
-        make, run = runLinuxCommands(path)
+        os.chdir('C:/Users/maxio/Desktop/Pythong/{}'.format(nameOfTest))
+        make, run = runLinuxCommands(os.getcwd())
         listOfMakes.append(make)
         listOfRuns.append(run)
         check = runDiffTest()
