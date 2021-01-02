@@ -46,7 +46,7 @@ def runLinuxCommands():
             if not possible_files: make = 'FAIL'
             else: make = 'OK'
             del possible_files, file_list
-            if os.path.exists('test1_cmp.txt'): run = 'OK'
+            if os.path.exists('trzy/test1_cmp.txt'): run = 'OK'
             else: run = 'FAIL'
         if tag == 'diff': pass
     print(dir())

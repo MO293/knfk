@@ -10,19 +10,30 @@ def count():
     return testList, len(testList)
 
 #Funkcja sprawdza czy dany test istnieje
-def testInDir(testName, ii):
-    if not os.path.exists(testName):
+def testIsPresent(testName, ii):
+    if os.path.exists(testName):
+        listOfFolders.append('{}'.format(testName))
+        listOfTags.append('test {}'.format(ii))
+        return True
+    else:
         listOfFolders.append('Test {} does not exist'.format(testName))
         listOfTags.append('FAIL of test-{}'.format(ii))
         listOfMakes.append('FAIL')
         listOfRuns.append('FAIL')
         listOfChecks.append('FAIL')
         return False
-    else:
-        listOfFolders.append('{}'.format(testName))
-        listOfTags.append('test {}'.format(ii))
-        return True
 
+#Funkcja sprawdza czy  w danym teście istnieje plik test_desc
+def testDescIsPresent(nameOfFolder, condition):
+    if condition:
+        os.chdir('C:/Users/maxio/Desktop/Pythong/{}'.format(nameOfFolder)) # Jeżeli folder istnieje to wchodzi do folderu
+        if os.path.exists('test_desc.txt'): return True # Jeżeli test.desc istnieje to zwraca True
+        else: # Jeżeli test.desc nie istnieje to dodaje FAIL dla makes/run/checks
+            listOfMakes.append('FAIL')
+            listOfRuns.append('FAIL')
+            listOfChecks.append('FAIL')
+            return False
+    else: return False
 
 #Funkcja wywołująca komendy z pliku test_desc
 def runLinuxCommands(nowpath):
@@ -42,21 +53,30 @@ def runLinuxCommands(nowpath):
             if not possible_files: now_make = 'FAIL'
             else: now_make = 'OK'
             del possible_files, file_list
-            if os.path.exists('test1_cmp.txt'): now_run = 'OK'
+            if os.path.exists('trzy/test1_cmp.txt'): now_run = 'OK'
             else: now_run = 'FAIL'
-        if tag == 'diff': continue
+        if tag == 'diff': pass
     return now_make, now_run
 
 #Funkcja porównująca wartości outputowe cmp z referencyjnymi ref
 def runDiffTest():
-    listOfValues = []
-    with open('test1_cmp.txt') as bf1:
-        with open('test1_ref.txt') as bf2:
-            for line1, line2 in zip(bf1, bf2):
-                cmp_tag, cmp_value = line1.split(": ") #tworzymy 2 stringi: tag i wartość z outputu
-                ref_tag, ref_value = line1.split(": ") #tworzymy 2 stringi: tag i wartość z referencyjnego
-                listOfValues.append(float(cmp_value.rstrip('\n')) - float(ref_value.rstrip('\n')))
-    if all(comparedValue < 10e-3 for comparedValue in listOfValues): now_check = 'OK'
+    valsCmp, valsRef, valsTol, comparedValues = [], [], [], []
+    with open('test1_cmp.txt') as f1:
+        next(f1)
+        for line1 in f1:
+            cmp_tag, cmp_value = line1.split()
+            valsCmp.append(float(cmp_value.rstrip('\n')))
+    with open('test1_ref.txt') as f2:
+        next(f2)
+        for line2 in f2:
+            ref_tag, ref_value, ref_tolerance = line2.split()
+            valsRef.append(float(ref_value.rstrip('\n')))
+            valsTol.append(float(ref_tolerance.rstrip('\n')))
+    for i in range(len(valsCmp)):
+        if abs(valsCmp[i] - valsRef[i]) < valsTol[i]:
+            comparedValues.append('OK')
+        else: comparedValues.append('FALSE')
+    if all(values == 'OK' for values in comparedValues): now_check = 'OK'
     else: now_check = 'FALSE'
     return now_check
 
@@ -73,45 +93,29 @@ def report(Lfolder, Ltag, Lmake, Lrun, Lcheck):
 
 #Main
 os.chdir('C:/Users/maxio/Desktop/Pythong')
-listOfTests, N = count() # Zapis do zmiennych listy nazwy testów i ile ich ma być do wykonania
-listOfFolders, listOfTags, listOfMakes, listOfRuns, listOfChecks = [], [], [], [], []
+listOfTests, N = count() # Zapis do listy nazwy testów i ile ich ma być do wykonania
+listOfFolders, listOfTags, listOfMakes, listOfRuns, listOfChecks, listOfErrors = [], [], [], [], [], []
 for i in range(1, N+1):
     nameOfTest = listOfTests[i-1]
-    ifdir = testInDir(nameOfTest, i)
-    if ifdir == True:
+    ifdir = testIsPresent(nameOfTest, i)
+    ifdesc = testDescIsPresent(nameOfTest, ifdir)
+    if ifdir and ifdesc:
         path = 'C:/Users/maxio/Desktop/Pythong/{}'.format(nameOfTest)
         os.chdir(path)
-        if os.path.exists('test.desc'):
-            make, run = runLinuxCommands(path)
-            listOfMakes.append(make)
-            listOfRuns.append(run)
-            del make, run
-            check = runDiffTest()
-            listOfChecks.append(check)
-            del check
-        else:
-            listOfMakes.append('FAIL')
-            listOfRuns.append('FAIL')
-            listOfChecks.append('FAIL')
+        make, run = runLinuxCommands(path)
+        listOfMakes.append(make)
+        listOfRuns.append(run)
+        check = runDiffTest()
+        listOfChecks.append(check)
+    elif ifdir is True and ifdesc is False: continue
+    elif ifdir is False and ifdesc is True: continue
     else: continue
 
-print(listOfFolders)
-print(listOfTags)
-print(listOfMakes)
-print(listOfRuns)
-print(listOfChecks)
-    # if testInDir(nameOfTest, i):
-
-    # else:
-    #     path = '/home/prohackerxxx/Desktop/testsuitePython/knfk/st-test-{}'.format(i)
-    #     os.chdir(path) #Wchodzimy do folderu st-test-i
-    #     make, run = runLinuxCommands(path)
-    #     listOfMakes.append(make)
-    #     listOfRuns.append(run)
-    #     del make, run
-    #     check = runDiffTest()
-    #     listOfChecks.append(check)
-    #     del check
+print(listOfFolders, len(listOfFolders))
+print(listOfTags, len(listOfTags))
+print(listOfMakes, len(listOfMakes))
+print(listOfRuns, len(listOfRuns))
+print(listOfChecks, len(listOfChecks))
 
 # report(listOfFolders, listOfTags, listOfMakes, listOfRuns, listOfChecks)
 print('Done.')
