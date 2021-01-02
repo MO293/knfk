@@ -1,15 +1,19 @@
-# #     # 2.    Wygeneruj raport .csv/.xls/.xlsx/.dat/.txt (nazwy kolumn: folder|tag|make|run|check)
-# #     # 3.    Zapisać raport w cd /home2/archive/ (opcjonalnie, nie wiem czy nie będzie on zczytywany szybciej niż 100 dni)
+# Funkcja generująca raport z przeprowadzonych testów
+# Jej output to: user_report_date_time.txt
+# Zapis w formacie: Folder|Tag|Make|Run|Check
 
 import os
-def runReport(folder, tag, make, run, check):
-    filepath = 'C:/Users/maxio/Desktop/tests/NowyOutput.txt'
+import datetime
+import getpass
+def runReport(Lfolder, Ltag, Lmake, Lrun, Lcheck):
+    nameReport = getpass.getuser() + '_report_' + datetime.datetime.now().strftime("%d.%m.%Y_%H.%M")
+    filepath = 'C:/Users/maxio/Desktop/Pythong/' + nameReport + '.txt'
     if os.path.isfile(filepath):
         os.remove(filepath)
     f = open(filepath, 'w')
     f.write('Folder\tTag\tMake\tRun\tCheck\n')
-    for i in range(len(folder)):
-        f.write("{}\t{}\t{}\t{}\t{}\n".format(folder[i], tag[i], make[i], run[i], check[i]))
+    for i in range(len(Lfolder)):
+        f.write("{}\t{}\t{}\t{}\t{}\n".format(Lfolder[i], Ltag[i], Lmake[i], Lrun[i], Lcheck[i]))
     f.close()
 
 #Na potrzeby testów
