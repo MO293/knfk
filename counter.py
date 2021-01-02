@@ -1,6 +1,5 @@
 # Funkcja określa jakie testy są do zrealizowania
 # Zwraca listę stringów i długość dla tablicy for
-from sys import getsizeof
 import numpy as np
 
 def count():
