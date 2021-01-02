@@ -6,4 +6,4 @@ exec: fsutil file createnew myEmptyFile.txt 0
 test: myEmptyFile.txt
 exec: echo ""
 test: test1.txt
-exec: echo ""
+exec: echo NUL
