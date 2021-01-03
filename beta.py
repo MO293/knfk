@@ -98,7 +98,7 @@ def runDiffTest():
 #Funkcja generująca raport
 def runReport(Lfolder, Ltag, Lmake, Lrun, Lcheck):
     nameReport = getpass.getuser() + '_report_' + datetime.datetime.now().strftime("%d.%m.%Y_%H.%M")
-    filepath = 'C:/Users/maxio/Desktop/Pythong/' + nameReport + '.txt'
+    filepath = setwd() + nameReport + '.txt'
     f = open(filepath, 'w')
     f.write('Folder\tTag\tMake\tRun\tCheck\n')
     for ii in range(len(Lfolder)):
