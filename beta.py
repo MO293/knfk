@@ -5,6 +5,10 @@ import getpass
 import numpy as np
 start_time = time.time()
 
+#Funkcja ustawia domyślny folder roboczy dla całego procesu testowania /home2/scratch/knfk/cold-atoms/testsuite
+def setwd():
+    return 'C:/Users/maxio/Desktop/Pythong/'
+
 #Jesteśmy w katalogu testsuite
 #Funkcja liczy linie z nazwami folderów testów
 def count():
@@ -15,11 +19,10 @@ def count():
 def testIsPresent(testName, ii):
     if os.path.exists(testName):
         listOfFolders.append('{}'.format(testName))
-        listOfTags.append('test{}'.format(ii))
         return True
     else:
-        listOfFolders.append('Test {} does not exist'.format(testName))
-        listOfTags.append('FAIL of test-{}'.format(ii))
+        listOfFolders.append(testName)
+        listOfTags.append('FAIL')
         listOfMakes.append('FAIL')
         listOfRuns.append('FAIL')
         listOfChecks.append('FAIL')
@@ -29,13 +32,23 @@ def testIsPresent(testName, ii):
 def testDescIsPresent(nameOfFolder, folderIsPresent):
     if folderIsPresent:
         os.chdir('C:/Users/maxio/Desktop/Pythong/{}'.format(nameOfFolder)) # Jeżeli folder istnieje to wchodzi do niego
-        if os.path.exists('test_desc.txt'): return True # Jeżeli test.desc istnieje to zwraca True
+        if os.path.exists('test_desc.txt'):
+            listOfTags.append('OK')
+            return True # Jeżeli test.desc istnieje to zwraca True
         else: # Jeżeli test.desc nie istnieje to dodaje FAIL dla makes/run/checks
+            listOfTags.append('FAIL')
             listOfMakes.append('FAIL')
             listOfRuns.append('FAIL')
             listOfChecks.append('FAIL')
             return False
     else: return False
+
+#Funkcja sprawdza czy w danym katalogu istnieje plik referencyjny .ref
+def refFile(nowpath):
+    file_list = os.listdir(nowpath)
+    possible_files = [fn for fn in file_list if 'ref' in fn]
+    if possible_files == []: return False
+    else: return True
 
 #Funkcja wywołująca komendy z pliku test_desc
 def runLinuxCommands(nowpath):
@@ -76,9 +89,9 @@ def runDiffTest():
     for i in range(len(valsCmp)):
         if abs(valsCmp[i] - valsRef[i]) < valsTol[i]:
             comparedValues.append('OK')
-        else: comparedValues.append('FALSE')
+        else: comparedValues.append('FAIL')
     if all(values == 'OK' for values in comparedValues): now_check = 'OK'
-    else: now_check = 'FALSE'
+    else: now_check = 'FAIL'
     return now_check
 
 #Funkcja generująca raport
@@ -92,21 +105,28 @@ def runReport(Lfolder, Ltag, Lmake, Lrun, Lcheck):
     f.close()
 
 #Main
-os.chdir('C:/Users/maxio/Desktop/Pythong') #Ustawiamy się w folderze roboczym /home2/scratch/knfk/cold-atoms/testsuite
+os.chdir(setwd()) #Ustawiamy się w folderze roboczym /home2/scratch/knfk/cold-atoms/testsuite
 listOfTests, N = count() # Zapis do listy nazwy testów i ile ich ma być do wykonania
 listOfFolders, listOfTags, listOfMakes, listOfRuns, listOfChecks, listOfErrors = [], [], [], [], [], []
 for i in range(1, N+1):
-    nameOfTest = listOfTests[i-1]
+    os.chdir(setwd()) #Ustawiamy się w folderze roboczym /home2/scratch/knfk/cold-atoms/testsuite
+    nameOfTest = str(listOfTests[i-1])
     ifdir = testIsPresent(nameOfTest, i) #Sprawdza czy dany folder z wypisanych w liście istnieje: zwraca T/F
     ifdesc = testDescIsPresent(nameOfTest, ifdir) #Sprawdza czy w danym folderze, który istnieje jest plik test.desc: zwraca T/F
-    #Oba powyższe muszą być ustawione na True, inaczej pętla przejdzie do następnego folderu z testem.
+    #Oba powyższe muszą być ustawione na True, inaczej pętla przejdzie do następnego folderu z następnym testem.
     if ifdir and ifdesc:
-        os.chdir('C:/Users/maxio/Desktop/Pythong/{}'.format(nameOfTest))
+        os.chdir(setwd() + '/{}'.format(nameOfTest))
         make, run = runLinuxCommands(os.getcwd())
         listOfMakes.append(make)
         listOfRuns.append(run)
-        check = runDiffTest()
-        listOfChecks.append(check)
+        # Z listy poleceń make mogło się wykonać, ale run niekoniecznie. Run = 'FAIL' jest gdy nie utworzy się plik .cmp
+        # więc trzeba sprawdzić czy cmp istnieje, oraz czy .ref istnieje.
+        print(os.getcwd())
+        if run == 'FAIL' or not refFile(os.getcwd()):
+            listOfChecks.append('FAIL')
+        else:
+            check = runDiffTest()
+            listOfChecks.append(check)
     else: continue
 
 print(listOfFolders, len(listOfFolders))

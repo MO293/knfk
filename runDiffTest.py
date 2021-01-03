@@ -4,12 +4,12 @@
 
 def runDiffTest():
     valsCmp, valsRef, valsTol, comparedValues = [], [], [], []
-    with open('trzy/test1_cmp.txt') as f1:
+    with open('test1_cmp.txt') as f1:
         next(f1)
         for line1 in f1:
             cmp_tag, cmp_value = line1.split()
             valsCmp.append(float(cmp_value.rstrip('\n')))
-    with open('trzy/test1_ref.txt') as f2:
+    with open('test1_ref.txt') as f2:
         next(f2)
         for line2 in f2:
             ref_tag, ref_value, ref_tolerance = line2.split()
