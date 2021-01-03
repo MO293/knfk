@@ -1,4 +1,5 @@
 # Funkcja czyta plik z instrukcją test_desc, po czym wykonuje linia po linii każdą komendę.
+# Zwraca tylko wartość OK lub FAIL dla zmiennych run i make
 
 import os
 def runLinuxCommands(nowpath):
@@ -17,8 +18,7 @@ def runLinuxCommands(nowpath):
             possible_files = [fn for fn in file_list if '-wslda-' in fn]
             if not possible_files: now_make = 'FAIL'
             else: now_make = 'OK'
-            del possible_files, file_list
-            if os.path.exists('trzy/test1_cmp.txt'): now_run = 'OK'
+            if os.path.exists('test1_cmp.txt'): now_run = 'OK'
             else: now_run = 'FAIL'
         if tag == 'diff': pass
     return now_make, now_run
