@@ -32,6 +32,7 @@ def testIsPresent(testName):
 def testDescIsPresent(nameOfFolder, folderIsPresent):
     if folderIsPresent:
         os.chdir(setwd()+'/{}'.format(nameOfFolder)) # Jeżeli folder istnieje to wchodzi do niego
+
         if os.path.exists('test_desc.txt'):
             listOfTags.append('OK')
             return True # Jeżeli test.desc istnieje to zwraca True
