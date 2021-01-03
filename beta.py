@@ -16,7 +16,7 @@ def count():
     return testList, len(testList)
 
 #Funkcja sprawdza czy dany test istnieje
-def testIsPresent(testName, ii):
+def testIsPresent(testName):
     if os.path.exists(testName):
         listOfFolders.append('{}'.format(testName))
         return True
@@ -31,7 +31,8 @@ def testIsPresent(testName, ii):
 #Funkcja sprawdza czy  w danym teście istnieje plik test_desc
 def testDescIsPresent(nameOfFolder, folderIsPresent):
     if folderIsPresent:
-        os.chdir('C:/Users/maxio/Desktop/Pythong/{}'.format(nameOfFolder)) # Jeżeli folder istnieje to wchodzi do niego
+        os.chdir(setwd()+'/{}'.format(nameOfFolder)) # Jeżeli folder istnieje to wchodzi do niego
+
         if os.path.exists('test_desc.txt'):
             listOfTags.append('OK')
             return True # Jeżeli test.desc istnieje to zwraca True
@@ -111,7 +112,7 @@ listOfFolders, listOfTags, listOfMakes, listOfRuns, listOfChecks, listOfErrors =
 for i in range(1, N+1):
     os.chdir(setwd()) #Ustawiamy się w folderze roboczym /home2/scratch/knfk/cold-atoms/testsuite
     nameOfTest = str(listOfTests[i-1])
-    ifdir = testIsPresent(nameOfTest, i) #Sprawdza czy dany folder z wypisanych w liście istnieje: zwraca T/F
+    ifdir = testIsPresent(nameOfTest) #Sprawdza czy dany folder z wypisanych w liście istnieje: zwraca T/F
     ifdesc = testDescIsPresent(nameOfTest, ifdir) #Sprawdza czy w danym folderze, który istnieje jest plik test.desc: zwraca T/F
     #Oba powyższe muszą być ustawione na True, inaczej pętla przejdzie do następnego folderu z następnym testem.
     if ifdir and ifdesc:
@@ -121,7 +122,6 @@ for i in range(1, N+1):
         listOfRuns.append(run)
         # Z listy poleceń make mogło się wykonać, ale run niekoniecznie. Run = 'FAIL' jest gdy nie utworzy się plik .cmp
         # więc trzeba sprawdzić czy cmp istnieje, oraz czy .ref istnieje.
-        print(os.getcwd())
         if run == 'FAIL' or not refFile(os.getcwd()):
             listOfChecks.append('FAIL')
         else:
