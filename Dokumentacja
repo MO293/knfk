@@ -1,0 +1,63 @@
+PL: Poniższa dokumentacja zawiera opis, jak przygotować testy by skrypt testujący mógł przeprowadzić je wszystkie,
+wygenerować pliki wynikowe oraz pozostawić raport z przeprowadzonych symulacji.
+
+Testy można przygotowywać na maszynie lokalnej, lecz ze względu na potrzebną pamięć roboczą, do przeprowadzenia
+rzeczywistych obliczeń, niezbędny będzie klaster obliczeniowy.
+
+Projekt WSLDA opiera się na repozytorium cold-atoms, które zawiera katalog testsuite. Katalog testsuite jest
+folderem roboczym i to w nim należy umieszczać wszystkie testy.
+
+Przygotowanie listy testów:
+===========================
+1. W folderze roboczym testsuite należy przygotować plik tekstowy o nazwie: "tlist"
+2. Plik "tlist" zawiera w sobie tylko informację o testach, które Użytkownik zamierza wykonać.
+3. Plik "tlist" może zawierać komentarze poprzedzane znakiem hash (#), celem ułatwienia Użytkownikowi późniejszej identyfikacji testu.
+4. Nazwa testu jest dowolna, lecz nie wolno korzystać ze znaków specjalnych innych niż kropka "." czy podkreślenie "_".
+5. Nazwy testów powinny być pisane ciągiem.
+6. Każdy kolejny test MUSI zaczynać się od nowej linijki w pliku "tlist"
+
+
+Przykładowy format pliku tlist:
+===============================
+# User: Jan
+# Data: 01.01.2021
+
+# To jest pierwszy test, który system testsuite wykona.
+# Zawarte w nim są bardzo ważne informacje.
+test_pierwszy
+# A tutaj jest następny test, który również Użytkownik chce wykonać.
+test.drugi
+# Test poniżej również się wykona:
+test_trzeci #pomimo komentarza zostawionego za nazwą testu
+
+
+test_czwartyyy #ten test również się wykona pomimo komentarza czy dwóch pustych linii pozostawionych powyżej
+#test_piąty #ten test się nie wykona gdyż został rozpoczęty ze znaku komentarza
+#test_szósty również się nie wykona
+
+end #to zostanie potraktowane jako test do wykonania
+#end #to nie zostanie potraktowane jako test do wykonania
+
+
+Przygotowanie folderu z testem:
+================================
+1. Po przygotowaniu pliku tekstowego "tlist" w folderze testsuite należy przygotować testy do przeprowadzenia
+2. Każdy kolejny test musi być umieszczony w innym folderze. Kolejny test to kolejny folder.
+3. Nazwa folderu musi odpowiadać nazwie testu "zgłoszonego" w pliku "tlist".
+(Czyli zgodnie z przykładem nazwy folderów to: test_pierwszy, test.drugi, test_trzeci, test_czwartyyy, end)
+4. Każdy folder musi zawierać w sobie plik tekstowy "test_desc", który będzie listą unixowych komend, które mają zostać wykonane, by przeprowadzić test. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+EN:
