@@ -1,9 +1,9 @@
-import os
-import time
 import datetime
 import getpass
-import numpy as np
 import logging
+import numpy as np
+import os
+import time
 
 #konfiguracja loggera w konsoli
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -19,6 +19,7 @@ start_time = time.time()
 #Funkcja ustawia domyślny folder roboczy dla całego procesu testowania /home2/scratch/knfk/cold-atoms/testsuite
 def setwd():
 	return '/home/prohackerxxx/cold-atoms/testsuite'
+	# return 'C:/Users/maxio/Desktop/Pythong'
 
 #Jesteśmy w katalogu testsuite
 #Funkcja liczy linie z nazwami folderów testów
@@ -127,8 +128,7 @@ def runDiffTest():
 
 #Funkcja generująca raport
 def runReport(Lfolder, Ltag, Lmake, Lrun, Lcheck):
-	nameReport = getpass.getuser() + '_report_' + datetime.datetime.now().strftime("%d.%m.%Y_%H.%M")
-	filepath = setwd() + nameReport + '.txt'
+	filepath = setwd() + getpass.getuser() + '_report_' + datetime.datetime.now().strftime("%d.%m.%Y_%H.%M") + '.txt'
 	f = open(filepath, 'w')
 	f.write('Folder\tTag\tMake\tRun\tCheck\n')
 	for ii in range(len(Lfolder)):
