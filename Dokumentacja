@@ -1,15 +1,16 @@
-PL: Poniższa dokumentacja zawiera opis, jak przygotować testy by skrypt testujący mógł przeprowadzić je wszystkie,
-wygenerować pliki wynikowe oraz pozostawić raport z przeprowadzonych symulacji.
+PL: 
+Poniższa dokumentacja zawiera instrukcję przygotowania testów wykorzystywanych do projektu WSLDA. Przygotowane testy system testujący
+przeprowadza wg kolejności zadanej przez użytkownika, a następnie generuje raport z przeprowadzonych symulacji.
 
 Testy można przygotowywać na maszynie lokalnej, lecz ze względu na potrzebną pamięć roboczą, do przeprowadzenia
 rzeczywistych obliczeń, niezbędny będzie klaster obliczeniowy.
 
 Projekt WSLDA opiera się na repozytorium cold-atoms, które zawiera katalog testsuite. Katalog testsuite jest
-folderem roboczym i to w nim należy umieszczać wszystkie testy.
+folderem roboczym i to w nim należy umieszczać wszystkie testy. Ścieżka: home2/scratch/knfk/cold-atoms/testsuite
 
 Przygotowanie listy testów:
 ===========================
-1. W folderze roboczym testsuite należy przygotować plik tekstowy o nazwie: "tlist"
+1. W folderze roboczym home2/scrach/knfk/cold-atoms/testsuite należy przygotować plik tekstowy o nazwie: "tlist"
 2. Plik "tlist" zawiera w sobie tylko informację o testach, które Użytkownik zamierza wykonać.
 3. Plik "tlist" może zawierać komentarze poprzedzane znakiem hash (#), celem ułatwienia Użytkownikowi późniejszej identyfikacji testu.
 4. Nazwa testu jest dowolna, lecz nie wolno korzystać ze znaków specjalnych innych niż kropka "." czy podkreślenie "_".
@@ -20,19 +21,18 @@ Przygotowanie listy testów:
 Przykładowy format pliku tlist:
 ===============================
 # User: Jan
-# Data: 01.01.2021
+# Data: 01/01/1970
 
-# To jest pierwszy test, który system testsuite wykona.
-# Zawarte w nim są bardzo ważne informacje.
+# Test poniżej jest pierwszym test, który system testsuite wykona.
 test_pierwszy
-# A tutaj jest następny test, który również Użytkownik chce wykonać.
+# Tutaj jest następny test, który Użytkownik chce wykonać.
 test.drugi
 # Test poniżej również się wykona:
-test_trzeci #pomimo komentarza zostawionego za nazwą testu
+test_trzeci #pomimo komentarza zostawionego w tym miejscu, za nazwą testu
 
 
 test_czwartyyy #ten test również się wykona pomimo komentarza czy dwóch pustych linii pozostawionych powyżej
-#test_piąty #ten test się nie wykona gdyż został rozpoczęty ze znaku komentarza
+#test_piąty #ten test się NIE wykona, gdyż został rozpoczęty ze znaku komentarza
 #test_szósty również się nie wykona
 
 end #to zostanie potraktowane jako test do wykonania
@@ -40,24 +40,122 @@ end #to zostanie potraktowane jako test do wykonania
 
 
 Przygotowanie folderu z testem:
-================================
+===============================
 1. Po przygotowaniu pliku tekstowego "tlist" w folderze testsuite należy przygotować testy do przeprowadzenia
 2. Każdy kolejny test musi być umieszczony w innym folderze. Kolejny test to kolejny folder.
 3. Nazwa folderu musi odpowiadać nazwie testu "zgłoszonego" w pliku "tlist".
 (Czyli zgodnie z przykładem nazwy folderów to: test_pierwszy, test.drugi, test_trzeci, test_czwartyyy, end)
 4. Każdy folder musi zawierać w sobie plik tekstowy "test_desc", który będzie listą unixowych komend, które mają zostać wykonane, by przeprowadzić test. 
+    Format pliku tekstowego "test_desc" został przedstawiony na grafice poniżej.
+5. Plik "test_desc" zawiera przypisane tagi w zależności od tego co należy wykonać:
+    - "tag" - oznacza nazwę testu
+    - "exec" - oznacza polecenie, które system testujący ma wykonać w terminalu
+    - "diff" - jest to opcja dająca znać systemowi, że test się zakończył i może zacząć porównywać wartości outputowe z referencyjnymi
+    
+Rozpoczęcie testowania:
+=======================
+1. Należy wejść do folderu: /home2/scratch/knfk/cold-atoms/testsuite
+2. Należy upewnić się czy zgodnie z plikiem "tlist" zamieszczone zostały wszystkie foldery z testami.
+3. Należy upewnić się czy wszystkie foldery zawierają potrzebne pliki, w tym plik opisowy "test_desc"
+4. Jeżeli wszystko zostało przygotowane poprawnie, należy wykonać skrypt testujący komendą: ./knfk_test.py
+5. Po zakończeniu testowania otrzymany zostanie raport tekstowy w formacie: user_data_godzina
+
+Wygenerowany raport:
+====================
+1. Raport wygeneruje się niezależnie od poprawności wykonania testów.
+2. Raport wykona się dopiero na sam koniec działania programu. Przerywanie programu sprawi, że nie otrzymamy wyników.
+3. Raport jest w formacie 5-kolumnowego pliku tekstowego: |Folder|Tag|Make|Run|Check|
+    Folder -- oznacza nazwę testu
+    Tag -- stanowi krótki jego opis
+    Make -- zwraca wartość logiczną: 'OK' lub 'FAIL'. Otrzymana zostanie wartość 'OK' w przypadku gdy kompilator utworzy plik wykonywalny "-wslda-"
+    Run -- zwraca wartość logiczną: 'OK' lub 'FAIL'. Otrzymana zostanie wartość 'OK' gdy plik '-wslda-' wygeneruje plik outputowy.
+    Check -- zwraca wartość logiczną: 'OK' lub 'FAIL'. Wartość 'OK' zostanie zwrócona, gdy WSZYSTKIE wartości outputowe porównane z referencyjnymi
+             mieszczą się w granicy tolerancji określonej przez plik referencyjny.
+
+Po wygenerowaniu raportu zaleca się przekopiowanie raportu na urządzenie lokalne oraz usunięcie go z katalogu testsuite.
 
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ENG: 
+Documentation below contains instructions, on how to prepare the tests used for the WSLDA project purposes. Testing system
+performs all given tests according to the order set by the user, and then generates a report based on the results of the simulations.
+
+Tests can be prepared on the local machine, yet due to requirements of working memory, to be run actual calculations,
+access to the computing cluster is highly recomended.
+
+The WSLDA project relies on the cold-atoms repository, which includes the testsuite directory. Testsuite's directory is
+working folder and all tests should be placed there.  Path: home2/scratch/knfk/cold-atoms/testsuite
+
+Preparation of the test list:
+===========================
+1. In the path home2/scrach/knfk/cold-atoms/testsuite prepare a text file named: "tlist".
+2. The "tlist" file contains information about the tests that the User intends to perform.
+3. Comments can be placed in he "tlist" file. Each comment is preceded by a hash sign (#). Hash sign is MANDATORY.
+4. The name of the test is elective. It is forbidden to use any special character other than dot "." or underscore "_".
+5. Test names must be written with a string. Using underscores is possible.
+6. Each subsequent test must start from a new line in the "tlist" file. One line for one test is MANDATORY.
+
+Sample "tlist" file format:
+===============================
+# User: John
+# Date: 01/01/1970
+
+# The test below is the first test that testsuite will execute.
+first_test
+# Here is the next test that the User wants to perform.
+second_test
+# The test below will be executed as well:
+third_test # despite the comment left after the name of the test
 
 
+fourth_testtt # this test will also run despite a comment or two blank lines left above
+# test_fifth # this test will NOT run due to the comment sign (#)
+# test_six will fail either
+
+end # this will be considered as a test to run
+#end # this will not be considered as a test to run
 
 
+Preparation of the test folder:
+===============================
+1. After preparing the "tlist" file in the testsuite directory, User has to prepare tests to perform.
+2. Each subsequent test must be placed in a different folder. Another test is another folder.
+3. Each folder name must match the name of the test given in "tlist".
+(So, according to the example, the folder names are: first_test, second_test, third_test, fourth_testtt, end)
+4. Each folder must contain a text file "test_desc". "Test_desc" contains a list of Unix commands to be run.
+    The format of the text file "test_desc" is shown in the image below.
+5. The file "test_desc" contains assigned tags depending on the purpose:
+    - "tag" - refers to the name of test
+    - "exec" - is the command to be executed, by the testing system in the terminal
+    - "diff" - option telling the system that the test is over and ready for comparing the output values with the reference values
 
 
+Start testing:
+=======================
+1. Switch directory to: /home2/scratch/knfk/cold-atoms/testsuite
+2. Make sure that all folders (tests) are included, according to the "tlist" file.
+3. Make sure that all folders (tests) contain the necessary files, including the description file "test_desc".
+4. If everything has been prepared correctly, run the test script with the command: ./knfk_test.py
+5. After the script is done, a text report will be received in the format: user_data_hour, so that every user could recognize his test
 
 
+Obtained report:
+====================
+1. The report will be generated regardless of the correctness of the test execution.
+2. The report will be performed only at the very end of the script operation. Interrupting the program will provide no results.
+3. The report is in the format of a 5-column text file: | Folder | Tag | Make | Run | Check |
+    Folder - name of the test
+    Tag - a short description of the test
+    Make - returns a boolean value: 'OK' or 'FAIL'. The value 'OK' will be obtained when the compiler creates the executable "-wslda-" file.
+    Run - returns a boolean value: 'OK' or 'FAIL'. The value 'OK' will be obtained when the file '-wslda-' will be performed succesfully.
+    Check - returns a logical value: 'OK' or 'FAIL'. 'OK' will be returned when ALL output values have been compared with reference
+             are within the tolerance specified by the reference file.
 
+After obtaining a report, it is recommended to copy it to your local device and remove from the testsuite directory.
 
+ESP:
 
-
-EN:
+RU:
