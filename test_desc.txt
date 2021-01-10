@@ -1,0 +1,7 @@
+tag: test1
+exec: rm -rf *.o program
+exec: make clean
+exec: make all
+exec: ./program test1
+test: test1
+diff: test1 ref1
