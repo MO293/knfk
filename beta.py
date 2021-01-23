@@ -13,24 +13,27 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 
 #wyłączenie wszystkich komunikatów loggera
 #logging.disable(logging.CRITICAL)
-logging.debug("Uruchomienie modulu testsuite")
+logging.debug("Uruchomienie modulu testsuite.")
 start_time = time.time()
 
 #Funkcja ustawia domyślny folder roboczy dla całego procesu testowania /home2/scratch/knfk/cold-atoms/testsuite
 def setwd():
-	return '/home/prohackerxxx/cold-atoms/testsuite'
+	return '/home/prohackerxxx/Desktop/testsuitePython/knfk'
 	# return 'C:/Users/maxio/Desktop/Pythong'
 
 #Jesteśmy w katalogu testsuite
 #Funkcja liczy linie z nazwami folderów testów
 def count():
+	logging.info("Liczenie testów.")
 	testList = list(np.genfromtxt("tlist.txt", dtype=str, comments="#"))
 	return testList, len(testList)
 
 #Funkcja sprawdza czy dany test istnieje
 def testIsPresent(testName):
+	logging.info("Sprawdzanie czy test\"" + testName + "\" istnieje.")
 	if os.path.exists(testName):
 		listOfFolders.append('{}'.format(testName))
+		logging.info("Znaleziono test \"" + testName + "\".")
 		return True
 	else:
 		listOfFolders.append(testName)
@@ -51,6 +54,7 @@ def testDescIsPresent(nameOfFolder, folderIsPresent):
 
 		if os.path.exists('test.desc'):
 			listOfTags.append('OK')
+			logging.info("Znaleziono plik \"test.desc\" w folderze \"" + nameOfFolder + "\".")
 			return True # Jeżeli test.desc istnieje to zwraca True
 		else: # Jeżeli test.desc nie istnieje to dodaje FAIL dla makes/run/checks
 			listOfTags.append('FAIL')
@@ -67,6 +71,7 @@ def testDescIsPresent(nameOfFolder, folderIsPresent):
 
 #Funkcja sprawdza czy w danym katalogu istnieje plik referencyjny .ref
 def refFile(nowpath):
+	logging.info("Sprawdzanie obecności plików referencyjnych .ref.")
 	file_list = os.listdir(nowpath)
 	possible_files = [fn for fn in file_list if 'ref' in fn]
 	if possible_files == []:
@@ -77,6 +82,7 @@ def refFile(nowpath):
 
 #Funkcja wywołująca komendy z pliku test_desc
 def runLinuxCommands(nowpath):
+	logging.info("Wykonywanie komend z pliku \"test.desc\".")
 	file = open('test.desc', "r").read().split("\n")  # otwiera plik i czyta linia po linii bez enterów
 	line_count = 0  # licznik linii
 	for line in file:  # pętla wykonuje się tak długo aż plik ma linie		
@@ -106,6 +112,7 @@ def runLinuxCommands(nowpath):
 
 #Funkcja porównująca wartości outputowe cmp z referencyjnymi ref
 def runDiffTest():
+	logging.info("Sprawdzanie wartości referencyjnych.")
 	valsCmp, valsRef, valsTol, comparedValues = [], [], [], []
 	with open('test1_cmp.txt') as f1:
 		next(f1)
@@ -128,6 +135,7 @@ def runDiffTest():
 
 #Funkcja generująca raport
 def runReport(Lfolder, Ltag, Lmake, Lrun, Lcheck):
+	logging.info("Generowanie raportu.")
 	filepath = setwd() + getpass.getuser() + '_report_' + datetime.datetime.now().strftime("%d.%m.%Y_%H.%M") + '.txt'
 	f = open(filepath, 'w')
 	f.write('Folder\tTag\tMake\tRun\tCheck\n')
@@ -167,4 +175,5 @@ print(listOfChecks, len(listOfChecks))
 
 runReport(listOfFolders, listOfTags, listOfMakes, listOfRuns, listOfChecks)
 print('Done.')
+logging.info("Zakończenie programu.")
 print("--- %.8s seconds ---" % (time.time() - start_time))
