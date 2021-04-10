@@ -4,36 +4,40 @@ import logging
 import numpy as np
 import os
 import time
+import subprocess as sub
+#configuration logger in console
+#logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-#konfiguracja loggera w konsoli
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+#configuration logger in testsuite.log file
+logFilePath=setwd() + getpass.getuser() + 'testsuite' + datetime.datetime.now().strftime("%d.%m.%Y_%H.%M") + '.log'
+logging.basicConfig(filename=logFilePath,level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-#konfiguracja loggera w pliku testsuite.log
-#logging.basicConfig(filename='testsuite.log',level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-
-#wyłączenie wszystkich komunikatów loggera
+#disable all logger comunicates
 #logging.disable(logging.CRITICAL)
-logging.debug("Uruchomienie modulu testsuite.")
+
+#testsuiteDirPath="/home2/scratch/knfk/cold-atoms/testsuite"
+testsuiteDirPath="/home/dteam011/testsuite"
+#makeReportDirPath = "/home2/scratch/knfk/cold-atoms/testsuite"
+makeReportDirPath = "/home/dteam011/knfk"
+logging.debug("Starting testsuite.")
 start_time = time.time()
 
-#Funkcja ustawia domyślny folder roboczy dla całego procesu testowania /home2/scratch/knfk/cold-atoms/testsuite
+#setting up default working directory for tests /home2/scratch/knfk/cold-atoms/testsuite
 def setwd():
-	return '/home/prohackerxxx/Desktop/testsuitePython/knfk'
-	# return 'C:/Users/maxio/Desktop/Pythong'
+	return testsuiteDirPath
 
-#Jesteśmy w katalogu testsuite
-#Funkcja liczy linie z nazwami folderów testów
+#Tests counting
 def count():
-	logging.info("Liczenie testów.")
+	logging.info("Tests counting.")
 	testList = list(np.genfromtxt("tlist.txt", dtype=str, comments="#"))
 	return testList, len(testList)
 
-#Funkcja sprawdza czy dany test istnieje
+#Checking if the test exists
 def testIsPresent(testName):
-	logging.info("Sprawdzanie czy test\"" + testName + "\" istnieje.")
+	logging.info("Checking if the \"" + testName + "\" test exists.")
 	if os.path.exists(testName):
 		listOfFolders.append('{}'.format(testName))
-		logging.info("Znaleziono test \"" + testName + "\".")
+		logging.info("\"" + testName + "\" test found.")
 		return True
 	else:
 		listOfFolders.append(testName)
@@ -42,84 +46,88 @@ def testIsPresent(testName):
 		listOfRuns.append('FAIL')
 		listOfChecks.append('FAIL')
 
-		logging.info("Test \"" + testName + "\" nie istnieje.")
+		logging.info("Test \"" + testName + "\" does not exist.")
 
 	return False
 
-#Funkcja sprawdza czy  w danym teście istnieje plik test_desc
+#Checking if there is test_desc file in the given test
 def testDescIsPresent(nameOfFolder, folderIsPresent):
 	if folderIsPresent:
-		os.chdir(setwd()+'/{}'.format(nameOfFolder)) # Jeżeli folder istnieje to wchodzi do niego		
-		logging.debug("Otwarto folder \"" + str(setwd()+'/{}'.format(nameOfFolder)) + "\".")
+		os.chdir(setwd()+'/{}'.format(nameOfFolder)) # entering the directory if it exists		
+		logging.debug("\"" + str(setwd()+'/{}'.format(nameOfFolder)) + "\" directory opened.")
 
 		if os.path.exists('test.desc'):
 			listOfTags.append('OK')
-			logging.info("Znaleziono plik \"test.desc\" w folderze \"" + nameOfFolder + "\".")
-			return True # Jeżeli test.desc istnieje to zwraca True
-		else: # Jeżeli test.desc nie istnieje to dodaje FAIL dla makes/run/checks
+			logging.info("\"test.desc\" file found in \"" + nameOfFolder + "\" directory.")
+			return True # return True if test.desc exists
+		else: # Otherwise it FAILs for makes/run/checks
 			listOfTags.append('FAIL')
 			listOfMakes.append('FAIL')
 			listOfRuns.append('FAIL')
 			listOfChecks.append('FAIL')
 
-			logging.info("\"test.desc\" nie istnieje w folderze \"" + nameOfFolder + "\".")
+			logging.info("\"test.desc\" does not exist in \"" + nameOfFolder + "\" directory.")
 
 			return False
 	else:
-		logging.info("Folder \"" + nameOfFolder + "\" nie istnieje.") 
+		logging.info("\"" + nameOfFolder + "\" directory does not exist.") 
 		return False
 
-#Funkcja sprawdza czy w danym katalogu istnieje plik referencyjny .ref
+#Checking if there is reference file .ref within a given directory
 def refFile(nowpath):
-	logging.info("Sprawdzanie obecności plików referencyjnych .ref.")
+	logging.info("Checking if there is a .ref file.")
 	file_list = os.listdir(nowpath)
 	possible_files = [fn for fn in file_list if 'ref' in fn]
 	if possible_files == []:
-		logging.info("Nie znaleziono pliku .ref.")		
+		logging.info(".ref file not found.")		
 		return False
 	
 	else: return True
 
-#Funkcja wywołująca komendy z pliku test_desc
+#Executing commands from test_desc file
 def runLinuxCommands(nowpath):
-	logging.info("Wykonywanie komend z pliku \"test.desc\".")
-	file = open('test.desc', "r").read().split("\n")  # otwiera plik i czyta linia po linii bez enterów
-	line_count = 0  # licznik linii
-	for line in file:  # pętla wykonuje się tak długo aż plik ma linie		
+	logging.info("Executing commands from \"test.desc\" file.")
+	file = open('test.desc', "r").read().split("\n")  #read file line by line without newlines
+	line_count = 0 
+	for line in file:		
 		if len(line) == 0: continue
 		else: pass
-		tag, command = line.split(": ")  # tworzy 2 stringi nadpisywane co iteracje
-		print('Linia nr ' + str(line_count) + ' zawiera komendę: ' + command)  # outputuje komendę dla danej linii pliku
-		if tag == 'tag': continue # Pomija ten tag i idzie do następnego kroku w pętli, czyli do następnej linii pliku
-		if tag == 'exec':  # wykonanie komendy
+		tag, command = line.split(": ")  #reading  new tag and command divided by ':' in line
+		print('Line num. ' + str(line_count) + ' contains command: ' + command)
+		if tag == 'tag': continue # ignore tag 'tag'
+		if tag == 'exec':  # execute command
 			os.system(command)
-		if tag == 'test':  # sprawdzenie czy pliki istnieją
+			#sub.run(command)
+		if tag == 'test':  # checking if the file exists
 			file_list = os.listdir(nowpath)
 			possible_files = [fn for fn in file_list if '-wslda-' in fn]
 			if not possible_files: 
 				now_make = 'FAIL'
-				logging.info("Nie odnaleziono plikow \"-wslda-\".")
+				logging.info("\"-wslda-\" files not found.")
 			else: now_make = 'OK'
-			if os.path.exists('test1_cmp.txt'): now_run = 'OK'
+			if os.path.exists('test1.cmp'): now_run = 'OK'
 			else: 
 				now_run = 'FAIL'
-				logging.info("Plik \"test1_cmp.txt\" nie istnieje.") 
+				logging.info("\"test1.cmp\" file does not exist.") 
 		if tag == 'diff': pass
 
 		line_count += 1
 
 	return now_make, now_run
 
-#Funkcja porównująca wartości outputowe cmp z referencyjnymi ref
+#Comparing output values from cmp files with reference values
 def runDiffTest():
-	logging.info("Sprawdzanie wartości referencyjnych.")
+	logging.info("Checking reference values.")
 	valsCmp, valsRef, valsTol, comparedValues = [], [], [], []
-	with open('test1_cmp.txt') as f1:
-		next(f1)
+	with open('test1.cmp') as f1:
+		#next(f1)
+		logging.info("\"test1.cmp\" opened.")
 		for line1 in f1:
 			cmp_tag, cmp_value = line1.split()
 			valsCmp.append(float(cmp_value.rstrip('\n')))
-	with open('test1_ref.txt') as f2:
+	with open('ref.test1') as f2:
+		logging.info("\"ref.test1\" opened.")
+		next(f2)
 		next(f2)
 		for line2 in f2:
 			ref_tag, ref_value, ref_tolerance = line2.split()
@@ -133,10 +141,12 @@ def runDiffTest():
 	else: now_check = 'FAIL'
 	return now_check
 
-#Funkcja generująca raport
+#Generating report
 def runReport(Lfolder, Ltag, Lmake, Lrun, Lcheck):
-	logging.info("Generowanie raportu.")
+	logging.info("Generating report.")
 	filepath = setwd() + getpass.getuser() + '_report_' + datetime.datetime.now().strftime("%d.%m.%Y_%H.%M") + '.txt'
+	#filepath = os.getcwd() + "getpass.getuser()" + '_report_.txt'
+	#filepath =makeReportDirPath + '_report_.txt'
 	f = open(filepath, 'w')
 	f.write('Folder\tTag\tMake\tRun\tCheck\n')
 	for ii in range(len(Lfolder)):
@@ -144,22 +154,28 @@ def runReport(Lfolder, Ltag, Lmake, Lrun, Lcheck):
 	f.close()
 
 #Main
-os.chdir(setwd()) #Ustawiamy się w folderze roboczym /home2/scratch/knfk/cold-atoms/testsuite
-listOfTests, N = count() # Zapis do listy nazwy testów i ile ich ma być do wykonania
+os.chdir(setwd()) #Ustawiamy sie w folderze roboczym /home2/scratch/knfk/cold-atoms/testsuite
+#sub.run("pwd") #debug
+#sub.run("module load openmpi-gcc721-Cuda90")
+#sub.run("module load cuda/9.0x")
+#sub.run("source /home/dteam011/testsuite/st-test-1/env.sh")
+listOfTests, N = count() # Zapis do listy nazwy testow i ile ich ma byc do wykonania
 listOfFolders, listOfTags, listOfMakes, listOfRuns, listOfChecks, listOfErrors = [], [], [], [], [], []
 for i in range(1, N+1):
-	os.chdir(setwd()) #Ustawiamy się w folderze roboczym /home2/scratch/knfk/cold-atoms/testsuite
+	os.chdir(setwd()) #Ustawiamy sie w folderze roboczym /home2/scratch/knfk/cold-atoms/testsuite
 	nameOfTest = str(listOfTests[i-1])
-	ifdir = testIsPresent(nameOfTest) #Sprawdza czy dany folder z wypisanych w liście istnieje: zwraca T/F
-	ifdesc = testDescIsPresent(nameOfTest, ifdir) #Sprawdza czy w danym folderze, który istnieje jest plik test.desc: zwraca T/F
-	#Oba powyższe muszą być ustawione na True, inaczej pętla przejdzie do następnego folderu z następnym testem.
+	ifdir = testIsPresent(nameOfTest) #Sprawdza czy dany folder z wypisanych w liscie istnieje: zwraca T/F
+	ifdesc = testDescIsPresent(nameOfTest, ifdir) #Sprawdza czy w danym folderze, ktory istnieje jest plik test.desc: zwraca T/F
+	#Oba powyzsze musza byc ustawione na True, inaczej petla przejdzie do nastepnego folderu z nastepnym testem.
 	if ifdir and ifdesc:
 		os.chdir(setwd() + '/{}'.format(nameOfTest))
+		#print("@@@@@@@@@@PWD@@@@@@@@@@")
+		#sub.run("pwd")
 		make, run = runLinuxCommands(os.getcwd())
 		listOfMakes.append(make)
 		listOfRuns.append(run)
-		# Z listy poleceń make mogło się wykonać, ale run niekoniecznie. Run = 'FAIL' jest gdy nie utworzy się plik .cmp
-		# więc trzeba sprawdzić czy cmp istnieje, oraz czy .ref istnieje.
+		# Z listy polecen make moglo sie wykonac, ale run niekoniecznie. Run = 'FAIL' jest gdy nie utworzy sie plik .cmp
+		# wiec trzeba sprawdzic czy cmp istnieje, oraz czy .ref istnieje.
 		if run == 'FAIL' or not refFile(os.getcwd()):
 			listOfChecks.append('FAIL')
 		else:
@@ -175,5 +191,5 @@ print(listOfChecks, len(listOfChecks))
 
 runReport(listOfFolders, listOfTags, listOfMakes, listOfRuns, listOfChecks)
 print('Done.')
-logging.info("Zakończenie programu.")
+logging.info("End of program.")
 print("--- %.8s seconds ---" % (time.time() - start_time))
