@@ -5,191 +5,171 @@ import numpy as np
 import os
 import time
 import subprocess as sub
-#configuration logger in console
-#logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-#configuration logger in testsuite.log file
-logFilePath=setwd() + getpass.getuser() + 'testsuite' + datetime.datetime.now().strftime("%d.%m.%Y_%H.%M") + '.log'
-logging.basicConfig(filename=logFilePath,level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-
-#disable all logger comunicates
-#logging.disable(logging.CRITICAL)
-
-#testsuiteDirPath="/home2/scratch/knfk/cold-atoms/testsuite"
-testsuiteDirPath="/home/dteam011/testsuite"
-#makeReportDirPath = "/home2/scratch/knfk/cold-atoms/testsuite"
-makeReportDirPath = "/home/dteam011/knfk"
-logging.debug("Starting testsuite.")
 start_time = time.time()
+listOfFolders, listOfTags, listOfMakes, listOfRuns, listOfDiffs, listOfChecks, listOfErrors = [], [], [], [], [], [], []
 
-#setting up default working directory for tests /home2/scratch/knfk/cold-atoms/testsuite
-def setwd():
-	return testsuiteDirPath
+# Setting default working directory
+def get_global_dir():
+    ggd = os.getcwd()
+    return ggd
 
-#Tests counting
-def count():
-	logging.info("Tests counting.")
-	testList = list(np.genfromtxt("tlist.txt", dtype=str, comments="#"))
-	return testList, len(testList)
+# Reading the text file with a list of directories with given tests to perform
+def count_dirs():
+    folder_list = list(np.genfromtxt("tlist.txt", dtype=str, comments="#"))
+    return folder_list, len(folder_list)
 
-#Checking if the test exists
-def testIsPresent(testName):
-	logging.info("Checking if the \"" + testName + "\" test exists.")
-	if os.path.exists(testName):
-		listOfFolders.append('{}'.format(testName))
-		logging.info("\"" + testName + "\" test found.")
-		return True
-	else:
-		listOfFolders.append(testName)
-		listOfTags.append('FAIL')
-		listOfMakes.append('FAIL')
-		listOfRuns.append('FAIL')
-		listOfChecks.append('FAIL')
+# Checking if directory with given tests exists in working directory
+def check(aa):
+    if os.path.exists(aa):
+        return True
+    else:
+        return False
 
-		logging.info("Test \"" + testName + "\" does not exist.")
+# Checking if test.desc exists
+def check_desc(dd="test_desc.txt"):
+    if os.path.exists(dd):
+        return True
+    else:
+        return False
 
-	return False
+# Counting the amount of tests to perform from each test.desc file
+def count_tests():
+    file = open('test_desc.txt', 'r').read().split('\n')
+    amnt = sum([1 for line in file if line.startswith('tag:')])
+    return amnt
 
-#Checking if there is test_desc file in the given test
-def testDescIsPresent(nameOfFolder, folderIsPresent):
-	if folderIsPresent:
-		os.chdir(setwd()+'/{}'.format(nameOfFolder)) # entering the directory if it exists		
-		logging.debug("\"" + str(setwd()+'/{}'.format(nameOfFolder)) + "\" directory opened.")
+# Comparing output file to the reference file (value by value)
+# If all differences of each values are below given tolerance, test is 'OK'
+def run_diff_test(output, reference):
+    out_vals, ref_vals, ref_tols, comparedValues = [], [], [], []
+    with open(output) as f1:
+        next(f1)  # Ta linijka pozwala ominąć tytuły kolumn w plikach
+        for line1 in f1:
+            out_tag, out_value = line1.split()
+            out_vals.append(float(out_value.rstrip('\n')))
+    with open(reference) as f2:
+        next(f2)
+        for line2 in f2:
+            ref_tag, ref_value, ref_tolerance = line2.split()
+            ref_vals.append(float(ref_value.rstrip('\n')))
+            ref_tols.append(float(ref_tolerance.rstrip('\n')))
+    for i in range(len(out_vals)):
+        if abs(out_vals[i] - ref_vals[i]) < ref_tols[i]:
+            comparedValues.append(True)
+        else:
+            comparedValues.append(False)
+    if all(values is True for values in comparedValues):
+        now_check = 'OK'
+    else:
+        now_check = 'FAIL'
+    return now_check
 
-		if os.path.exists('test.desc'):
-			listOfTags.append('OK')
-			logging.info("\"test.desc\" file found in \"" + nameOfFolder + "\" directory.")
-			return True # return True if test.desc exists
-		else: # Otherwise it FAILs for makes/run/checks
-			listOfTags.append('FAIL')
-			listOfMakes.append('FAIL')
-			listOfRuns.append('FAIL')
-			listOfChecks.append('FAIL')
+# Executing Unix commands given for each test in test.desc file
+def commands():
+    tag_test_counter = 0
+    tab_checks, tab_makes, tab_runs, tab_diffs = [], [], [], []
+    file = open('test_desc.txt', "r").read().split('\n')
+    for line in file:
+        if line.startswith('#'): continue
+        if line.startswith('tag:'):
+            tagg, add_tag = line.split(': ')
+            listOfTags.append(add_tag)
+            continue
+        if line.startswith('exec:'):
+            tagg, ex_comm = line.split(': ')
+            os.system(ex_comm)
+            continue
+        if line.startswith('test:'):
+            tag_test_counter += 1
+            if tag_test_counter == 1:
+                tagg, made_file = line.split(': ')
+                if os.path.exists(made_file):
+                    now_make = 'OK'
+                else:
+                    now_make = 'FAIL'
+                continue
+            if tag_test_counter == 2:
+                tagg, out_file = line.split(': ')
+                if os.path.exists(out_file):
+                    now_run = 'OK'
+                else:
+                    now_run = 'FAIL'
+                tag_test_counter = 0
+                continue
+        if line.startswith('diff:'):
+            tagg, diff_comm = line.split(': ')
+            files_to_compare = diff_comm.split(' ')
+            file1, file2 = files_to_compare[0], files_to_compare[1]
+            if os.path.exists(file1) and os.path.exists(file2):
+                check_diff = run_diff_test(file1, file2)
+                now_check = str(check_diff)
+                tab_checks.append(now_check)
+            else:
+                now_check = 'FAIL'
+                tab_checks.append(now_check)
+            tab_makes.append(str(now_make))
+            tab_runs.append(str(now_run))
+        if len(line) == 0: continue
+    return tab_makes, tab_runs, tab_checks
 
-			logging.info("\"test.desc\" does not exist in \"" + nameOfFolder + "\" directory.")
+# Generating final report
+def runReport(Folder, Tag, Make, Run, Check):
+    max_arr = []
+    tmp_arr = [Folder, Tag, Make, Run, Check]
+    for i in tmp_arr:
+        max_arr.append(len(max(i, key=len)))
+    space = max(max_arr) + 2
+    Folder.insert(0, 'Folder')
+    Tag.insert(0, 'Tag')
+    Make.insert(0, 'Make')
+    Run.insert(0, 'Run')
+    Check.insert(0, 'Check')
+    filepath = S + '/' + getpass.getuser() + '_report_' + datetime.datetime.now().strftime("%d.%m.%Y_%H.%M") + '.txt'
+    arrs = np.transpose([Folder, Tag, Make, Run, Check])
+    np.savetxt(filepath, arrs, '%-{}s'.format(space), '\t')
 
-			return False
-	else:
-		logging.info("\"" + nameOfFolder + "\" directory does not exist.") 
-		return False
+# Cute print to the Terminal window
+def cute_print():
+    print('\n')
+    printable_array = [listOfFolders, listOfTags, listOfMakes, listOfRuns, listOfChecks]
+    col_width = max(len(word) for row in printable_array for word in row) + 2
+    for row in printable_array:
+        print("".join(word.ljust(col_width) for word in row))
+    print('\n')
 
-#Checking if there is reference file .ref within a given directory
-def refFile(nowpath):
-	logging.info("Checking if there is a .ref file.")
-	file_list = os.listdir(nowpath)
-	possible_files = [fn for fn in file_list if 'ref' in fn]
-	if possible_files == []:
-		logging.info(".ref file not found.")		
-		return False
-	
-	else: return True
 
-#Executing commands from test_desc file
-def runLinuxCommands(nowpath):
-	logging.info("Executing commands from \"test.desc\" file.")
-	file = open('test.desc', "r").read().split("\n")  #read file line by line without newlines
-	line_count = 0 
-	for line in file:		
-		if len(line) == 0: continue
-		else: pass
-		tag, command = line.split(": ")  #reading  new tag and command divided by ':' in line
-		print('Line num. ' + str(line_count) + ' contains command: ' + command)
-		if tag == 'tag': continue # ignore tag 'tag'
-		if tag == 'exec':  # execute command
-			os.system(command)
-			#sub.run(command)
-		if tag == 'test':  # checking if the file exists
-			file_list = os.listdir(nowpath)
-			possible_files = [fn for fn in file_list if '-wslda-' in fn]
-			if not possible_files: 
-				now_make = 'FAIL'
-				logging.info("\"-wslda-\" files not found.")
-			else: now_make = 'OK'
-			if os.path.exists('test1.cmp'): now_run = 'OK'
-			else: 
-				now_run = 'FAIL'
-				logging.info("\"test1.cmp\" file does not exist.") 
-		if tag == 'diff': pass
-
-		line_count += 1
-
-	return now_make, now_run
-
-#Comparing output values from cmp files with reference values
-def runDiffTest():
-	logging.info("Checking reference values.")
-	valsCmp, valsRef, valsTol, comparedValues = [], [], [], []
-	with open('test1.cmp') as f1:
-		#next(f1)
-		logging.info("\"test1.cmp\" opened.")
-		for line1 in f1:
-			cmp_tag, cmp_value = line1.split()
-			valsCmp.append(float(cmp_value.rstrip('\n')))
-	with open('ref.test1') as f2:
-		logging.info("\"ref.test1\" opened.")
-		next(f2)
-		next(f2)
-		for line2 in f2:
-			ref_tag, ref_value, ref_tolerance = line2.split()
-			valsRef.append(float(ref_value.rstrip('\n')))
-			valsTol.append(float(ref_tolerance.rstrip('\n')))
-	for i in range(len(valsCmp)):
-		if abs(valsCmp[i] - valsRef[i]) < valsTol[i]:
-			comparedValues.append('OK')
-		else: comparedValues.append('FAIL')
-	if all(values == 'OK' for values in comparedValues): now_check = 'OK'
-	else: now_check = 'FAIL'
-	return now_check
-
-#Generating report
-def runReport(Lfolder, Ltag, Lmake, Lrun, Lcheck):
-	logging.info("Generating report.")
-	filepath = setwd() + getpass.getuser() + '_report_' + datetime.datetime.now().strftime("%d.%m.%Y_%H.%M") + '.txt'
-	#filepath = os.getcwd() + "getpass.getuser()" + '_report_.txt'
-	#filepath =makeReportDirPath + '_report_.txt'
-	f = open(filepath, 'w')
-	f.write('Folder\tTag\tMake\tRun\tCheck\n')
-	for ii in range(len(Lfolder)):
-		f.write("{}\t{}\t{}\t{}\t{}\n".format(Lfolder[ii], Ltag[ii], Lmake[ii], Lrun[ii], Lcheck[ii]))
-	f.close()
-
-#Main
-os.chdir(setwd()) #Ustawiamy sie w folderze roboczym /home2/scratch/knfk/cold-atoms/testsuite
-#sub.run("pwd") #debug
-#sub.run("module load openmpi-gcc721-Cuda90")
-#sub.run("module load cuda/9.0x")
-#sub.run("source /home/dteam011/testsuite/st-test-1/env.sh")
-listOfTests, N = count() # Zapis do listy nazwy testow i ile ich ma byc do wykonania
-listOfFolders, listOfTags, listOfMakes, listOfRuns, listOfChecks, listOfErrors = [], [], [], [], [], []
-for i in range(1, N+1):
-	os.chdir(setwd()) #Ustawiamy sie w folderze roboczym /home2/scratch/knfk/cold-atoms/testsuite
-	nameOfTest = str(listOfTests[i-1])
-	ifdir = testIsPresent(nameOfTest) #Sprawdza czy dany folder z wypisanych w liscie istnieje: zwraca T/F
-	ifdesc = testDescIsPresent(nameOfTest, ifdir) #Sprawdza czy w danym folderze, ktory istnieje jest plik test.desc: zwraca T/F
-	#Oba powyzsze musza byc ustawione na True, inaczej petla przejdzie do nastepnego folderu z nastepnym testem.
-	if ifdir and ifdesc:
-		os.chdir(setwd() + '/{}'.format(nameOfTest))
-		#print("@@@@@@@@@@PWD@@@@@@@@@@")
-		#sub.run("pwd")
-		make, run = runLinuxCommands(os.getcwd())
-		listOfMakes.append(make)
-		listOfRuns.append(run)
-		# Z listy polecen make moglo sie wykonac, ale run niekoniecznie. Run = 'FAIL' jest gdy nie utworzy sie plik .cmp
-		# wiec trzeba sprawdzic czy cmp istnieje, oraz czy .ref istnieje.
-		if run == 'FAIL' or not refFile(os.getcwd()):
-			listOfChecks.append('FAIL')
-		else:
-			check = runDiffTest()
-			listOfChecks.append(check)
-	else: continue
-
-print(listOfFolders, len(listOfFolders))
-print(listOfTags, len(listOfTags))
-print(listOfMakes, len(listOfMakes))
-print(listOfRuns, len(listOfRuns))
-print(listOfChecks, len(listOfChecks))
+# Main function
+S = get_global_dir()  # Set head directory
+F, N = count_dirs()  # Amount and names of tests to perform
+for folder in F:
+    os.chdir(S)  # Return to the head directory after each iteration
+    s = os.getcwd()  # Entering to the dir with tests inside to perform
+    f = str(folder)
+    check_if_dir_exists = check(f)  # Checking if dir with tests exists
+    if check_if_dir_exists:
+        os.chdir(s + '/{}'.format(f))
+        check_desc_file = check_desc()  # Checking if test.desc file exists
+        if check_desc_file:
+            amount = count_tests()  # Counting tags starting with "tag" from test.desc file.
+                                    # It returns the amount of tests in each dir
+            for test in range(amount):
+                listOfFolders.append(f)
+            makes, runs, checks = commands()  # EXECUTING TESTS
+            for m in makes: listOfMakes.append(m)
+            for r in runs: listOfRuns.append(r)
+            for c in checks: listOfChecks.append(c)
+        else:
+            # Należy dodać logger, informujący, że w folderze ,,folder'' nie znaleziono pliku test.desc
+            # więc dany folder został ominięto
+            continue
+    else:
+        # Należy dodać logger, informujący, że dla iteracji ,,folder'' nie znaleziono w folderze roboczym testsuite
+        # faktycznego folderu, który zadeklarowano w tlist.txt
+        # Należy dodać logger, że dany folder ominięto.
+        continue
 
 runReport(listOfFolders, listOfTags, listOfMakes, listOfRuns, listOfChecks)
+cute_print()
 print('Done.')
-logging.info("End of program.")
 print("--- %.8s seconds ---" % (time.time() - start_time))
