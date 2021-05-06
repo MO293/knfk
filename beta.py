@@ -16,7 +16,12 @@ def get_global_dir():
 
 # Reading the text file with a list of directories with given tests to perform
 def count_dirs():
-    folder_list = list(np.genfromtxt("tlist.txt", dtype=str, comments="#"))
+    folder_list = []
+    file = open('tlist.txt', "r").read().split('\n')
+    for line in file:
+        if line.startswith('#'): continue
+        else: folder_list.append(line)
+    folder_list = [x for x in folder_list if x != '']
     return folder_list, len(folder_list)
 
 # Checking if directory with given tests exists in working directory
